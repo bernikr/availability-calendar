@@ -75,7 +75,8 @@ def get_events(config: CalendarConfig) -> list[Event]:
                 ne.add("DTSTART", e["DTSTART"])
                 ne.add("DTEND", e["DTEND"])
                 for key in source.include:
-                    ne.add(key, e[key])
+                    if key in e:
+                        ne.add(key, e[key])
                 if "SUMMARY" not in ne:
                     ne.add("SUMMARY", source.event_name)
                 events.append(ne)
