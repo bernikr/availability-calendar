@@ -37,6 +37,8 @@ calendars:
       - <another private key>
     sources:
       - url: <url to ical calendar>
+      - url: <url to ical calendar>
+        hide_if_overlapped: true # optional, hides events that are completely covered by another event from a source above
 ```
 
 The ical will then be available at `http://localhost:8000/work.ics?key=<private key>`
