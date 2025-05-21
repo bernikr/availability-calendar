@@ -31,6 +31,12 @@ calendars:
       - url: <url to ical calendar>
         include: # optional, icalendar keys to include in the calendar
           - SUMMARY # use the title of the event
+  private: # the name of the calendar (will be used as the filename)
+    key: # also supports multiple keys in case you want to revoke one later
+      - <private key>
+      - <another private key>
+    sources:
+      - url: <url to ical calendar>
 ```
 
 The ical will then be available at `http://localhost:8000/work.ics?key=<private key>`

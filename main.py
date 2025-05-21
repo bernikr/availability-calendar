@@ -1,6 +1,7 @@
 import datetime
 import os
 from pathlib import Path
+from typing import Annotated, Any
 
 import pytz
 import recurring_ical_events
@@ -8,7 +9,7 @@ import requests
 import yaml
 from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
-from pydantic import BaseModel
+from pydantic import BaseModel, BeforeValidator
 
 VERSION = "0.2.1"
 
@@ -19,6 +20,14 @@ CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "config.yaml"))
 app = FastAPI()
 
 
+def ensure_list(value: Any) -> list[Any] | None:  # noqa: ANN401
+    if value is None:
+        return None
+    if not isinstance(value, list):
+        return [value]
+    return value
+
+
 class SourceConfig(BaseModel):
     url: str
     include: list[str] = []
@@ -27,7 +36,7 @@ class SourceConfig(BaseModel):
 
 class CalendarConfig(BaseModel):
     sources: list[SourceConfig]
-    key: str | None = None
+    key: Annotated[list[str] | None, BeforeValidator(ensure_list)] = None
     days_ahead: int = 28
 
 
@@ -42,7 +51,8 @@ CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:
         return Response("Not Found", status_code=404)
-    if CONFIG.calendars[cal].key is not None and key != CONFIG.calendars[cal].key:
+    keys = CONFIG.calendars[cal].key
+    if keys is not None and key not in keys:
         return Response("Unauthorized", status_code=401)
     c = Calendar()
     for e in get_events(CONFIG.calendars[cal]):
