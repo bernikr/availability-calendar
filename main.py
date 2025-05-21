@@ -8,7 +8,7 @@ import requests
 import yaml
 from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
-from pydantic import VERSION, BaseModel
+from pydantic import BaseModel
 
 VERSION = "0.1.0"
 
@@ -21,10 +21,14 @@ app = FastAPI()
 
 class SourceConfig(BaseModel):
     url: str
+    include: list[str] = []
+    event_name: str = "Busy"
 
 
 class CalendarConfig(BaseModel):
     sources: list[SourceConfig]
+    key: str | None = None
+    days_ahead: int = 28
 
 
 class Config(BaseModel):
@@ -34,10 +38,12 @@ class Config(BaseModel):
 CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 
 
-@app.get("/{cal}")
-def get_ical(cal: str) -> Response:
+@app.get("/{cal}.ics")
+def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:
-        return Response("Calendar not found", status_code=404)
+        return Response("Not Found", status_code=404)
+    if key is not None and key != CONFIG.calendars[cal].key:
+        return Response("Unauthorized", status_code=401)
     c = Calendar()
     for e in get_events(CONFIG.calendars[cal]):
         c.add_component(e)
@@ -51,14 +57,17 @@ def get_events(config: CalendarConfig) -> list[Event]:
         cal = Calendar().from_ical(ical.text)
         source_events = recurring_ical_events.of(cal).between(
             datetime.datetime.now(tz=TZ).date(),
-            datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=7),
+            datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
         )
         for e in source_events:
             if e["TRANSP"] == "OPAQUE":
                 ne = Event()
-                ne.add("summary", "Busy")
-                ne.add("dtstart", e["DTSTART"])
-                ne.add("dtend", e["DTEND"])
+                ne.add("DTSTART", e["DTSTART"])
+                ne.add("DTEND", e["DTEND"])
+                for key in source.include:
+                    ne.add(key, e[key])
+                if "SUMMARY" not in ne:
+                    ne.add("SUMMARY", source.event_name)
                 events.append(ne)
     return events
 
