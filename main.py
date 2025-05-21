@@ -72,11 +72,9 @@ def get_events(config: CalendarConfig) -> list[Event]:
         for e in source_events:
             if e.get("TRANSP", "OPAQUE") == "OPAQUE":
                 ne = Event()
-                ne.add("DTSTART", e["DTSTART"])
-                ne.add("DTEND", e["DTEND"])
-                for key in source.include:
-                    if key in e:
-                        ne.add(key, e[key])
+                for k in ["DTSTART", "DTEND", "DURATION", *source.include]:
+                    if k in e:
+                        ne.add(k, e[k])
                 if "SUMMARY" not in ne:
                     ne.add("SUMMARY", source.event_name)
                 events.append(ne)
