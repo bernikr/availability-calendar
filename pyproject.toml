@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi>=0.115.12",
+    "fastapi[standard]>=0.115.12",
     "pydantic>=2.11.4",
     "pytz>=2025.2",
     "pyyaml>=6.0.2",
