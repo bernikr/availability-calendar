@@ -42,7 +42,7 @@ CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:
         return Response("Not Found", status_code=404)
-    if key is not None and key != CONFIG.calendars[cal].key:
+    if CONFIG.calendars[cal].key is not None and key != CONFIG.calendars[cal].key:
         return Response("Unauthorized", status_code=401)
     c = Calendar()
     for e in get_events(CONFIG.calendars[cal]):
