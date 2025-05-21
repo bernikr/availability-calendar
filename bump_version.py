@@ -12,7 +12,7 @@ MAIN_BRANCH = "main"
 VERSION_OCCURANCES = [
     ("pyproject.toml", r'(version = ")(\S+)(")', 1),
     ("main.py", r'(VERSION = ")(\S+)(")', 1),
-    #("README.md", r"(image: ghcr.io/bernikr/availability-calendar:)(\S+)()", 1),
+    ("README.md", r"(image: ghcr.io/bernikr/availability-calendar:)(\S+)()", 1),
 ]
 UPDATE_LOCKFILE = True
 

@@ -1,0 +1,34 @@
+# Availability Calendar
+
+Create an ical calendar with your availability based on multiple source ical calendars.
+
+## Usage and Configuration
+
+`compose.yaml`
+
+```yaml
+services:
+  availability-calendar:
+    image: ghcr.io/bernikr/availability-calendar:0.1.0
+    environment:
+      TZ: Europe/Vienna # optional defaults to Europe/Vienna
+    volumes:
+      - ./config.yaml:/config.yaml
+    ports:
+      - 8000:8000
+```
+
+`config.yaml`
+
+```yaml  
+calendars:
+  work: # the name of the calendar (will be used as the filename)
+    key: <private key> # optional, if set the calendar will only be accessible with the key
+    days_ahead: 7 # optional, defaults to 28, how far into the future to include events
+    sources:
+      - url: <url to ical calendar>
+        event_name: "I'm busy" # optional, defaults to "Busy"
+      - url: <url to ical calendar>
+        include: # optional, icalendar keys to include in the calendar
+          - SUMMARY # use the title of the event
+```
