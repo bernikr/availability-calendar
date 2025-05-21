@@ -12,7 +12,7 @@ from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
 from pydantic import BaseModel, BeforeValidator
 
-VERSION = "0.3.1"
+VERSION = "0.4.0"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "config.yaml"))
