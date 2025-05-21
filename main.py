@@ -8,7 +8,9 @@ import requests
 import yaml
 from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
-from pydantic import BaseModel
+from pydantic import VERSION, BaseModel
+
+VERSION = "0.1.0"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "config.yaml"))
