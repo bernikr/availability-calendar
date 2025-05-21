@@ -77,7 +77,7 @@ def get_calendar(config: CalendarConfig) -> Calendar:
                     e.start,
                     e.end,
                 )  # type: ignore
-                if any(e2.start < e.start and e2.end > e.end for e2 in overlaps):
+                if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
                     continue
 
             ne = Event()
