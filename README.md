@@ -32,3 +32,5 @@ calendars:
         include: # optional, icalendar keys to include in the calendar
           - SUMMARY # use the title of the event
 ```
+
+The ical will then be available at `http://localhost:8000/work.ics?key=<private key>`
