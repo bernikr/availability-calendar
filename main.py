@@ -1,11 +1,12 @@
+import asyncio
 import datetime
 import os
 from pathlib import Path
 from typing import Annotated, Any
 
+import aiohttp
 import pytz
 import recurring_ical_events
-import requests
 import yaml
 from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
@@ -49,21 +50,27 @@ CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 
 
 @app.get("/{cal}.ics")
-def get_ical(cal: str, key: str = "") -> Response:
+async def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:
         return Response("Not Found", status_code=404)
     keys = CONFIG.calendars[cal].key
     if keys is not None and key not in keys:
         return Response("Unauthorized", status_code=401)
-    c = get_calendar(CONFIG.calendars[cal])
+    c = await get_calendar(CONFIG.calendars[cal])
     return Response(c.to_ical(), media_type="text/calendar")
 
 
-def get_calendar(config: CalendarConfig) -> Calendar:
+async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
+    async with session.get(url) as response:
+        return await response.text()
+
+
+async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
-    for source in config.sources:
-        ical = requests.get(source.url, timeout=5)
-        cal = Calendar().from_ical(ical.text)
+    async with aiohttp.ClientSession() as session:
+        icals = await asyncio.gather(*(fetch_data(session, source.url) for source in config.sources))
+    for ical, source in zip(icals, config.sources, strict=True):
+        cal = Calendar().from_ical(ical)
         source_events: list[Event] = recurring_ical_events.of(cal).between(
             datetime.datetime.now(tz=TZ).date(),
             datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),

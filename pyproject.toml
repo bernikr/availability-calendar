@@ -4,12 +4,12 @@ version = "0.3.1"
 description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
+    "aiohttp>=3.11.18",
     "fastapi[standard]>=0.115.12",
     "pydantic>=2.11.4",
     "pytz>=2025.2",
     "pyyaml>=6.0.2",
     "recurring-ical-events>=3.7.0",
-    "requests>=2.32.3",
 ]
 
 [tool.uv]
