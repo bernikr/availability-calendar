@@ -70,7 +70,7 @@ def get_events(config: CalendarConfig) -> list[Event]:
             datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
         )
         for e in source_events:
-            if e["TRANSP"] == "OPAQUE":
+            if e.get("TRANSP", "OPAQUE") == "OPAQUE":
                 ne = Event()
                 ne.add("DTSTART", e["DTSTART"])
                 ne.add("DTEND", e["DTEND"])
