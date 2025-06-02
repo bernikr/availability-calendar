@@ -15,6 +15,7 @@ dependencies = [
 [tool.uv]
 dev-dependencies = [
     "gitpython>=3.1.44",
+    "pre-commit>=4.2.0",
     "ruff>=0.6.9",
     "semver>=3.0.4",
     "uvicorn>=0.34.2",

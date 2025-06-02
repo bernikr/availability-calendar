@@ -9,7 +9,7 @@ from semver import Version
 
 MAIN_BRANCH = "main"
 
-VERSION_OCCURANCES = [
+VERSION_OCCURRENCES = [
     ("pyproject.toml", r'(version = ")(\S+)(")', 1),
     ("main.py", r'(VERSION = ")(\S+)(")', 1),
     ("README.md", r"(image: ghcr.io/bernikr/availability-calendar:)(\S+)()", 1),
@@ -19,7 +19,7 @@ UPDATE_LOCKFILE = True
 versions = set()
 has_wanings = False
 
-for filename, regex, occurrences in VERSION_OCCURANCES:
+for filename, regex, occurrences in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r") as f:
         res = re.findall(regex, f.read())
     if len(res) != occurrences:
@@ -74,7 +74,7 @@ if repo.is_dirty():
     print("WARNING: repo is dirty, please commit or stage changes before continuing")
     input("Press enter to continue")
 
-for filename, regex, _ in VERSION_OCCURANCES:
+for filename, regex, _ in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r+") as f:
         res = re.sub(regex, f"\\g<1>{next_version}\\g<3>", f.read())
         f.seek(0)
@@ -90,7 +90,7 @@ if has_wanings:
 
 res = input("Do you want to commit the changes? [y/N] ")
 if res.lower() in {"y", "yes"}:
-    repo.git.add(*{filename for filename, _, _ in VERSION_OCCURANCES})
+    repo.git.add(*{filename for filename, _, _ in VERSION_OCCURRENCES})
     if UPDATE_LOCKFILE:
         repo.git.add("uv.lock")
     repo.git.commit("-m", f"Bump version to {next_version}")
