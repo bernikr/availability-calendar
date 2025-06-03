@@ -17,19 +17,19 @@ VERSION_OCCURRENCES = [
 UPDATE_LOCKFILE = True
 
 versions = set()
-has_wanings = False
+has_warnings = False
 
 for filename, regex, occurrences in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r") as f:
         res = re.findall(regex, f.read())
     if len(res) != occurrences:
-        print(f"WARNING: version occurance mismatch in {filename}")
-        has_wanings = True
+        print(f"WARNING: version occurrence mismatch in {filename}")
+        has_warnings = True
     versions.update(r[1] for r in res)
 
 if len(versions) != 1:
     print(f"WARNING: multiple versions found: {versions}")
-    has_wanings = True
+    has_warnings = True
 
 version = max(Version.parse(v) for v in versions)
 
@@ -67,7 +67,7 @@ if user_input:
 print(f"Entered version: {next_version}")
 if not next_version > version:
     print("WARNING: new version should be greater than current version")
-    has_wanings = True
+    has_warnings = True
 
 repo = Repo(Path(__file__).parent)
 if repo.is_dirty():
@@ -84,8 +84,8 @@ for filename, regex, _ in VERSION_OCCURRENCES:
 if UPDATE_LOCKFILE:
     os.system("uv lock")  # noqa: S605, S607
 
-if has_wanings:
-    print("WARNING: there were warnings, please check the output before contiuning")
+if has_warnings:
+    print("WARNING: there were warnings, please check the output before continuing")
     input("Press enter to continue")
 
 res = input("Do you want to commit the changes? [y/N] ")
