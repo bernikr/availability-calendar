@@ -93,39 +93,43 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")
     async with aiohttp.ClientSession() as session:
         icals = await asyncio.gather(*(fetch_data(session, source.url) for source in config.sources))
+
+    events: list[tuple[Event, SourceConfig]] = []
     for ical, source in zip(icals, config.sources, strict=True):
         cal = Calendar().from_ical(ical)
         source_events: list[Event] = recurring_ical_events.of(cal).between(
             datetime.datetime.now(tz=TZ).date(),
             datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
         )  # type: ignore
-        for e in sorted(source_events, key=lambda e: e.start):
-            if e.get("TRANSP", "OPAQUE") != "OPAQUE":
+        events.extend((e, source) for e in source_events)
+
+    for e, source in sorted(events, key=lambda e: e[0].start):
+        if e.get("TRANSP", "OPAQUE") != "OPAQUE":
+            continue
+
+        if source.hide_if_overlapped:
+            overlaps: list[Event] = recurring_ical_events.of(c).between(
+                e.start,
+                e.end,
+            )  # type: ignore
+            if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
                 continue
 
-            if source.hide_if_overlapped:
-                overlaps: list[Event] = recurring_ical_events.of(c).between(
-                    e.start,
-                    e.end,
-                )  # type: ignore
-                if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
-                    continue
+        ne = Event()
+        ne.start = e.start
+        ne.end = e.end
 
-            ne = Event()
-            ne.start = e.start
-            ne.end = e.end
+        for k, v in source.properties.items():
+            ne.add(k, v)
 
-            for k, v in source.properties.items():
-                ne.add(k, v)
+        for k in source.include:
+            if k in e and k not in ne:
+                ne.add(k, e[k])
 
-            for k in source.include:
-                if k in e and k not in ne:
-                    ne.add(k, e[k])
+        if "SUMMARY" not in ne:
+            ne.add("SUMMARY", source.event_name)
 
-            if "SUMMARY" not in ne:
-                ne.add("SUMMARY", source.event_name)
-
-            c.add_component(ne)
+        c.add_component(ne)
     return c
 
 
