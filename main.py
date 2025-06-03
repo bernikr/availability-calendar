@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import os
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, overload
 
 import aiohttp
 import pytz
@@ -21,12 +21,18 @@ CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "config.yaml"))
 app = FastAPI()
 
 
-def ensure_list(value: Any) -> list[Any] | None:  # noqa: ANN401
+@overload
+def ensure_list[T](value: list[T]) -> list[T]: ...
+@overload
+def ensure_list(value: None) -> None: ...
+@overload
+def ensure_list[T](value: T) -> list[T] | None: ...
+def ensure_list[T](value: list[T] | T) -> list[T] | None:
     if value is None:
         return None
-    if not isinstance(value, list):
-        return [value]
-    return value
+    if isinstance(value, list):
+        return value
+    return [value]
 
 
 class SourceConfig(BaseModel):
@@ -67,6 +73,7 @@ async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
 
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
+    c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")
     async with aiohttp.ClientSession() as session:
         icals = await asyncio.gather(*(fetch_data(session, source.url) for source in config.sources))
     for ical, source in zip(icals, config.sources, strict=True):
