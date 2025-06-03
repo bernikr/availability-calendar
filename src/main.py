@@ -14,7 +14,8 @@ from fastapi import Cookie, FastAPI, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from icalendar import Calendar, Event
-from pydantic import BaseModel, BeforeValidator
+from pydantic import AliasGenerator, BaseModel, BeforeValidator, ConfigDict
+from pydantic.alias_generators import to_camel
 
 VERSION = "0.6.0"
 
@@ -52,6 +53,7 @@ class SourceConfig(ConfigBaseModel):
     include: list[str] = []
     event_name: str = "Busy"
     hide_if_overlapped: bool = False
+    tentative: bool = False
     properties: dict[str, str] = {}
 
 
@@ -78,16 +80,29 @@ class SessionCookie(BaseModel):
 
 
 class FullCalendarEvent(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(
+            serialization_alias=to_camel,
+        ),
+    )
+
     start: datetime.datetime | datetime.date
     end: datetime.datetime | datetime.date
     title: str
+    class_names: list[str]
 
 
 def to_fullcalendar_event(e: Event) -> FullCalendarEvent:
+    css_classes: list[str] = []
+
+    if e.get("STATUS", "") == "TENTATIVE":
+        css_classes.append("tentative")
+
     return FullCalendarEvent(
         start=e.start,
         end=e.end,
         title=e.get("SUMMARY", ""),
+        class_names=css_classes,
     )
 
 
@@ -107,7 +122,7 @@ async def json_feed(
     cookie = SessionCookie.model_validate_json(session)
     c = await get_calendar(CONFIG.calendars[cal])
     events: list[Event] = recurring_ical_events.of(c).between(start, end)  # type: ignore
-    return JSONResponse(content=[to_fullcalendar_event(e).model_dump(mode="json") for e in events])
+    return JSONResponse(content=[to_fullcalendar_event(e).model_dump(mode="json", by_alias=True) for e in events])
 
 
 @app.get("/{cal}.ics")
@@ -152,6 +167,27 @@ async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
         return await response.text()
 
 
+def create_event(e: Event, source: SourceConfig) -> Event:
+    ne = Event()
+    ne.start = e.start
+    ne.end = e.end
+
+    if source.tentative:
+        ne.add("STATUS", "TENTATIVE")
+
+    for k, v in source.properties.items():
+        ne.add(k, v)
+
+    for k in source.include:
+        if k in e and k not in ne:
+            ne.add(k, e[k])
+
+    if "SUMMARY" not in ne:
+        ne.add("SUMMARY", source.event_name)
+
+    return ne
+
+
 @cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
@@ -180,21 +216,7 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
             if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
                 continue
 
-        ne = Event()
-        ne.start = e.start
-        ne.end = e.end
-
-        for k, v in source.properties.items():
-            ne.add(k, v)
-
-        for k in source.include:
-            if k in e and k not in ne:
-                ne.add(k, e[k])
-
-        if "SUMMARY" not in ne:
-            ne.add("SUMMARY", source.event_name)
-
-        c.add_component(ne)
+        c.add_component(create_event(e, source))
     return c
 
 

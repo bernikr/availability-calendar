@@ -39,6 +39,7 @@ calendars:
       - url: <url to ical calendar>
       - url: <url to ical calendar>
         hide_if_overlapped: true # optional, hides events that are completely covered by another event
+        tentative: true # optional, show the event as tentative in supported clients
 ```
 
 The ical will then be available at `http://localhost:8000/work.ics?key=<private key>`
