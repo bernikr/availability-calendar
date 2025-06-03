@@ -55,6 +55,11 @@ class Config(BaseModel):
 CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 
 
+@app.get("/version")
+def version() -> dict[str, str]:
+    return {"version": VERSION}
+
+
 @app.get("/{cal}.ics")
 async def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:
