@@ -15,7 +15,7 @@ from pydantic import BaseModel, BeforeValidator, model_validator
 VERSION = "0.6.0"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
-CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "config.yaml"))
+CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "../config.yaml"))
 
 
 app = FastAPI()

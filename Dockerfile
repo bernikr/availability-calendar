@@ -20,7 +20,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
-COPY main.py pyproject.toml uv.lock .python-version /app/
+COPY pyproject.toml uv.lock .python-version /app/
+COPY src/ src/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
@@ -30,4 +31,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 
-CMD ["fastapi", "run", "main.py"]
+CMD ["fastapi", "run", "src/main.py"]
