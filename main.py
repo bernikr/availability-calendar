@@ -99,7 +99,7 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
             datetime.datetime.now(tz=TZ).date(),
             datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
         )  # type: ignore
-        for e in source_events:
+        for e in sorted(source_events, key=lambda e: e.start):
             if e.get("TRANSP", "OPAQUE") != "OPAQUE":
                 continue
 
