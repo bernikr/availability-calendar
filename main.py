@@ -10,7 +10,7 @@ import recurring_ical_events
 import yaml
 from fastapi import FastAPI, Response
 from icalendar import Calendar, Event
-from pydantic import BaseModel, BeforeValidator
+from pydantic import BaseModel, BeforeValidator, model_validator
 
 VERSION = "0.4.1"
 
@@ -35,20 +35,31 @@ def ensure_list[T](value: list[T] | T) -> list[T] | None:
     return [value]
 
 
-class SourceConfig(BaseModel):
+class MyBaseModel(BaseModel):
+    @model_validator(mode="before")
+    @classmethod
+    def _alert_extra_field[T](cls, values: dict[str, T]) -> dict[str, T]:
+        if extra_fields := values.keys() - cls.model_fields.keys() - {v.alias for v in cls.model_fields.values()}:
+            msg = f"Unexpected field(s): {', '.join(extra_fields)}"
+            raise ValueError(msg)
+
+        return values
+
+
+class SourceConfig(MyBaseModel):
     url: str
     include: list[str] = []
     event_name: str = "Busy"
     hide_if_overlapped: bool = False
 
 
-class CalendarConfig(BaseModel):
+class CalendarConfig(MyBaseModel):
     sources: list[SourceConfig]
     key: Annotated[list[str] | None, BeforeValidator(ensure_list)] = None
     days_ahead: int = 28
 
 
-class Config(BaseModel):
+class Config(MyBaseModel):
     calendars: dict[str, CalendarConfig]
 
 
