@@ -1,0 +1,68 @@
+import asyncio
+import datetime
+
+import aiohttp
+import recurring_ical_events
+from cachetools import TTLCache
+from cachetools_async import cached
+from icalendar import Calendar, Event
+
+from config import TZ, CalendarConfig, SourceConfig
+
+
+async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
+    async with session.get(url) as response:
+        return await response.text()
+
+
+def create_event(e: Event, source: SourceConfig) -> Event:
+    ne = Event()
+    ne.start = e.start
+    ne.end = e.end
+
+    if source.tentative:
+        ne.add("STATUS", "TENTATIVE")
+
+    for k, v in source.properties.items():
+        ne.add(k, v)
+
+    for k in source.include:
+        if k in e and k not in ne:
+            ne.add(k, e[k])
+
+    if "SUMMARY" not in ne:
+        ne.add("SUMMARY", source.event_name)
+
+    return ne
+
+
+@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
+async def get_calendar(config: CalendarConfig) -> Calendar:
+    c = Calendar()
+    c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")
+    async with aiohttp.ClientSession() as session:
+        icals = await asyncio.gather(*(fetch_data(session, source.url) for source in config.sources))
+
+    events: list[tuple[Event, SourceConfig]] = []
+    for ical, source in zip(icals, config.sources, strict=True):
+        cal = Calendar().from_ical(ical)
+        source_events: list[Event] = recurring_ical_events.of(cal).between(
+            datetime.datetime.now(tz=TZ).date(),
+            datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
+        )  # type: ignore
+        events.extend((e, source) for e in source_events)
+
+    for e, source in sorted(events, key=lambda e: e[0].start):
+        if e.get("TRANSP", "OPAQUE") != "OPAQUE":
+            continue
+
+        if source.hide_if_overlapped:
+            overlaps: list[Event] = recurring_ical_events.of(c).between(
+                e.start,
+                e.end,
+            )  # type: ignore
+            if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
+                continue
+
+        c.add_component(create_event(e, source))
+    return c
