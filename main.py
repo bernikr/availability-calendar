@@ -51,6 +51,7 @@ class SourceConfig(MyBaseModel):
     include: list[str] = []
     event_name: str = "Busy"
     hide_if_overlapped: bool = False
+    properties: dict[str, str] = {}
 
 
 class CalendarConfig(MyBaseModel):
@@ -113,11 +114,17 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
             ne = Event()
             ne.start = e.start
             ne.end = e.end
+
+            for k, v in source.properties.items():
+                ne.add(k, v)
+
             for k in source.include:
-                if k in e:
+                if k in e and k not in ne:
                     ne.add(k, e[k])
+
             if "SUMMARY" not in ne:
                 ne.add("SUMMARY", source.event_name)
+
             c.add_component(ne)
     return c
 
