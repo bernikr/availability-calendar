@@ -17,7 +17,7 @@ from icalendar import Calendar, Event
 from pydantic import AliasGenerator, BaseModel, BeforeValidator, ConfigDict
 from pydantic.alias_generators import to_camel
 
-VERSION = "0.6.0"
+VERSION = "1.0.0"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
