@@ -8,17 +8,22 @@ import aiohttp
 import pytz
 import recurring_ical_events
 import yaml
-from fastapi import FastAPI, Response
+from cachetools import TTLCache
+from cachetools_async import cached
+from fastapi import Cookie, FastAPI, Request, Response
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
 from icalendar import Calendar, Event
-from pydantic import BaseModel, BeforeValidator, model_validator
+from pydantic import BaseModel, BeforeValidator
 
 VERSION = "0.6.0"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
-CONFIG_FILE = Path(os.getenv("CONFIG_FILE", "../config.yaml"))
+CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
 
 
 app = FastAPI()
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
 @overload
@@ -35,18 +40,14 @@ def ensure_list[T](value: list[T] | T) -> list[T] | None:
     return [value]
 
 
-class MyBaseModel(BaseModel):
-    @model_validator(mode="before")
-    @classmethod
-    def _alert_extra_field[T](cls, values: dict[str, T]) -> dict[str, T]:
-        if extra_fields := values.keys() - cls.model_fields.keys() - {v.alias for v in cls.model_fields.values()}:
-            msg = f"Unexpected field(s): {', '.join(extra_fields)}"
-            raise ValueError(msg)
+class ConfigBaseModel(BaseModel):
+    model_config = {"extra": "forbid"}
 
-        return values
+    def __hash__(self) -> int:
+        return hash(self.model_dump_json)
 
 
-class SourceConfig(MyBaseModel):
+class SourceConfig(ConfigBaseModel):
     url: str
     include: list[str] = []
     event_name: str = "Busy"
@@ -54,13 +55,13 @@ class SourceConfig(MyBaseModel):
     properties: dict[str, str] = {}
 
 
-class CalendarConfig(MyBaseModel):
+class CalendarConfig(ConfigBaseModel):
     sources: list[SourceConfig]
     key: Annotated[list[str] | None, BeforeValidator(ensure_list)] = None
     days_ahead: int = 28
 
 
-class Config(MyBaseModel):
+class Config(ConfigBaseModel):
     calendars: dict[str, CalendarConfig]
 
 
@@ -70,6 +71,43 @@ CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
 @app.get("/version")
 def version() -> dict[str, str]:
     return {"version": VERSION}
+
+
+class SessionCookie(BaseModel):
+    saved_keys: dict[str, str] = {}
+
+
+class FullCalendarEvent(BaseModel):
+    start: datetime.datetime | datetime.date
+    end: datetime.datetime | datetime.date
+    title: str
+
+
+def to_fullcalendar_event(e: Event) -> FullCalendarEvent:
+    return FullCalendarEvent(
+        start=e.start,
+        end=e.end,
+        title=e.get("SUMMARY", ""),
+    )
+
+
+@app.get("/{cal}.json")
+async def json_feed(
+    cal: str,
+    start: datetime.datetime,
+    end: datetime.datetime,
+    session: Annotated[str, Cookie()] = "{}",
+) -> Response:
+    if cal not in CONFIG.calendars:
+        return Response("Not Found", status_code=404)
+    keys = CONFIG.calendars[cal].key
+    cookie = SessionCookie.model_validate_json(session)
+    if keys is not None and cookie.saved_keys.get(cal, "") not in keys:
+        return Response("Unauthorized", status_code=401)
+    cookie = SessionCookie.model_validate_json(session)
+    c = await get_calendar(CONFIG.calendars[cal])
+    events: list[Event] = recurring_ical_events.of(c).between(start, end)  # type: ignore
+    return JSONResponse(content=[to_fullcalendar_event(e).model_dump(mode="json") for e in events])
 
 
 @app.get("/{cal}.ics")
@@ -83,11 +121,38 @@ async def get_ical(cal: str, key: str = "") -> Response:
     return Response(c.to_ical(), media_type="text/calendar")
 
 
+@app.get("/{cal}")
+async def cal_view(
+    request: Request,
+    cal: str,
+    key: str = "",
+    session: Annotated[str, Cookie()] = "{}",
+) -> Response:
+    if cal not in CONFIG.calendars:
+        return Response("Not Found", status_code=404)
+    cookie = SessionCookie.model_validate_json(session)
+    keys = CONFIG.calendars[cal].key
+    if keys is not None and (key or cookie.saved_keys.get(cal, "")) not in keys:
+        return Response("Unauthorized", status_code=401)
+    if key:
+        cookie.saved_keys[cal] = key
+        response = RedirectResponse(url=f"/{cal}")
+        response.set_cookie("session", cookie.model_dump_json())
+        return response
+
+    return templates.TemplateResponse(
+        request=request,
+        name="calendar.html",
+        context={"cal": cal, "tz": TZ.zone},
+    )
+
+
 async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         return await response.text()
 
 
+@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")

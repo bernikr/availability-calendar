@@ -5,7 +5,10 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.11.18",
+    "cachetools>=6.0.0",
+    "cachetools-async>=0.0.4",
     "fastapi[standard]>=0.115.12",
+    "jinja2>=3.1.6",
     "pydantic>=2.11.4",
     "pytz>=2025.2",
     "pyyaml>=6.0.2",
