@@ -36,6 +36,16 @@ def create_event(e: Event, source: SourceConfig) -> Event:
     return ne
 
 
+def as_datetime(dt: datetime.datetime | datetime.date) -> datetime.datetime:
+    if isinstance(dt, datetime.datetime):
+        return dt
+    return datetime.datetime.combine(dt, datetime.time(0, 0, 0), tzinfo=TZ)
+
+
+def is_all_day(e: Event) -> bool:
+    return not isinstance(e.start, datetime.datetime)
+
+
 @cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
@@ -52,16 +62,16 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
         )  # type: ignore
         events.extend((e, source) for e in source_events)
 
-    for e, source in sorted(events, key=lambda e: e[0].start):
+    for e, source in sorted(events, key=lambda e: (as_datetime(e[0].start), -e[0].duration.total_seconds())):
         if e.get("TRANSP", "OPAQUE") != "OPAQUE":
             continue
 
-        if source.hide_if_overlapped:
+        if source.hide_if_overlapped and not is_all_day(e):
             overlaps: list[Event] = recurring_ical_events.of(c).between(
                 e.start,
                 e.end,
             )  # type: ignore
-            if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps):
+            if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps if not is_all_day(e2)):
                 continue
 
         c.add_component(create_event(e, source))
