@@ -37,6 +37,8 @@ calendars:
       - <another private key>
     sources:
       - url: <url to ical calendar>
+        filter: # optional
+          name_regex: "[^\\?]$" # optional, regex to filter events by name (example: hide events with a question mark at the end)
       - url: <url to ical calendar>
         hide_if_overlapped: true # optional, hides events that are completely covered by another event
         tentative: true # optional, show the event as tentative in supported clients
