@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import re
 
 import aiohttp
 import recurring_ical_events
@@ -10,6 +11,7 @@ from icalendar import Calendar, Event
 from config import TZ, CalendarConfig, SourceConfig
 
 
+@cached(cache=TTLCache(maxsize=20, ttl=60))
 async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         return await response.text()
@@ -63,6 +65,9 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
         events.extend((e, source) for e in source_events)
 
     for e, source in sorted(events, key=lambda e: (as_datetime(e[0].start), -e[0].duration.total_seconds())):
+        if source.filter.name_regex and not re.search(source.filter.name_regex, e.get("SUMMARY", "")):
+            continue
+
         if e.get("TRANSP", "OPAQUE") != "OPAQUE":
             continue
 

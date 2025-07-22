@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 from typing import Annotated, overload
 
@@ -28,6 +29,10 @@ class ConfigBaseModel(BaseModel):
         return hash(self.model_dump_json)
 
 
+class FilterConfig(ConfigBaseModel):
+    name_regex: re.Pattern[str] | None = None
+
+
 class SourceConfig(ConfigBaseModel):
     url: str
     include: list[str] = []
@@ -35,6 +40,7 @@ class SourceConfig(ConfigBaseModel):
     hide_if_overlapped: bool = False
     tentative: bool = False
     properties: dict[str, str] = {}
+    filter: FilterConfig = FilterConfig()
 
 
 class CalendarConfig(ConfigBaseModel):
