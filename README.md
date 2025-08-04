@@ -9,7 +9,7 @@ Create an ical calendar with your availability based on multiple source ical cal
 ```yaml
 services:
   availability-calendar:
-    image: ghcr.io/bernikr/availability-calendar:1.1.2
+    image: ghcr.io/bernikr/availability-calendar:1.1.3
     environment:
       TZ: Europe/Vienna # optional defaults to Europe/Vienna
     volumes:
