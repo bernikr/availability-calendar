@@ -61,7 +61,6 @@ async def json_feed(
     cookie = SessionCookie.model_validate_json(session)
     if keys is not None and cookie.saved_keys.get(cal, "") not in keys:
         return Response("Unauthorized", status_code=401)
-    cookie = SessionCookie.model_validate_json(session)
     c = await get_calendar(CONFIG.calendars[cal])
     events: list[Event] = recurring_ical_events.of(c).between(start, end)  # type: ignore
     return JSONResponse(content=[to_fullcalendar_event(e).model_dump(mode="json", by_alias=True) for e in events])
@@ -83,15 +82,16 @@ async def cal_view(
     if key:
         cookie.saved_keys[cal] = key
         response = RedirectResponse(url=f"/{cal}")
-        response.set_cookie(
-            "session",
-            cookie.model_dump_json(),
-            max_age=60 * 60 * 24 * 400,  # 400 days is maximum lifetime for cookies
+    else:
+        response = templates.TemplateResponse(
+            request=request,
+            name="calendar.html",
+            context={"cal": cal, "tz": TZ.zone},
         )
-        return response
 
-    return templates.TemplateResponse(
-        request=request,
-        name="calendar.html",
-        context={"cal": cal, "tz": TZ.zone},
+    response.set_cookie(
+        "session",
+        cookie.model_dump_json(),
+        max_age=60 * 60 * 24 * 400,  # 400 days is maximum lifetime for cookies
     )
+    return response
