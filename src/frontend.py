@@ -83,7 +83,11 @@ async def cal_view(
     if key:
         cookie.saved_keys[cal] = key
         response = RedirectResponse(url=f"/{cal}")
-        response.set_cookie("session", cookie.model_dump_json())
+        response.set_cookie(
+            "session",
+            cookie.model_dump_json(),
+            max_age=60 * 60 * 24 * 400,  # 400 days is maximum lifetime for cookies
+        )
         return response
 
     return templates.TemplateResponse(
