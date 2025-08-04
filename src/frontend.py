@@ -41,8 +41,8 @@ def to_fullcalendar_event(e: Event) -> FullCalendarEvent:
         css_classes.append("tentative")
 
     return FullCalendarEvent(
-        start=e.start,
-        end=e.end,
+        start=e.start.astimezone(tz=TZ) if isinstance(e.start, datetime.datetime) else e.start,
+        end=e.end.astimezone(tz=TZ) if isinstance(e.end, datetime.datetime) else e.end,
         title=e.get("SUMMARY", ""),
         class_names=css_classes,
     )
