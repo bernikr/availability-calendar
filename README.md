@@ -14,6 +14,8 @@ services:
       TZ: Europe/Vienna # optional defaults to Europe/Vienna
     volumes:
       - ./config.yaml:/config.yaml
+    environment:
+      FORWARDED_ALLOW_IPS: 127.0.0.1 # optional, ip of your reverse proxy (if you're using one)
     ports:
       - 8000:8000
 ```
