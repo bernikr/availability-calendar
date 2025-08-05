@@ -1,0 +1,7 @@
+services:
+  availability-calendar:
+    build: .
+    volumes:
+      - ./config.yaml:/config.yaml
+    ports:
+      - 8000:8000
