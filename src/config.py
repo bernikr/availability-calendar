@@ -53,7 +53,7 @@ class Config(ConfigBaseModel):
     calendars: dict[str, CalendarConfig]
 
 
-VERSION = "1.1.3"
+VERSION = "1.1.4"
 
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
