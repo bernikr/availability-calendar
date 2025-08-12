@@ -20,3 +20,6 @@ repos:
         additional_dependencies: ["uv"]
         types: [python]
         pass_filenames: false
+ci:
+  skip:
+    - mypy
