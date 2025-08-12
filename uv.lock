@@ -114,7 +114,6 @@ dev = [
     { name = "types-cachetools" },
     { name = "types-icalendar" },
     { name = "types-pyyaml" },
-    { name = "uvicorn" },
 ]
 
 [package.metadata]
@@ -140,7 +139,6 @@ dev = [
     { name = "types-cachetools", specifier = ">=6.1.0.20250717" },
     { name = "types-icalendar", specifier = ">=6.3.1.20250809" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20250809" },
-    { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 
 [[package]]

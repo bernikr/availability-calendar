@@ -25,7 +25,6 @@ dev = [
     "types-cachetools>=6.1.0.20250717",
     "types-icalendar>=6.3.1.20250809",
     "types-pyyaml>=6.0.12.20250809",
-    "uvicorn>=0.35.0",
 ]
 
 [tool.ruff]
