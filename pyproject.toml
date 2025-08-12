@@ -15,12 +15,17 @@ dependencies = [
     "recurring-ical-events>=3.7.0",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "gitpython>=3.1.44",
+    "mypy>=1.17.1",
     "pre-commit>=4.2.0",
+    "pyright>=1.1.403",
     "ruff>=0.6.9",
     "semver>=3.0.4",
+    "types-cachetools>=6.1.0.20250717",
+    "types-icalendar>=6.3.1.20250809",
+    "types-pyyaml>=6.0.12.20250809",
     "uvicorn>=0.34.2",
 ]
 
@@ -33,5 +38,7 @@ select = ["ALL"]
 ignore = [
     "D",      # pydocstyle
     "CPY",    # flake8-copyright
-    "PGH003", # Use specific error codes when using noqa
 ]
+
+[tool.mypy]
+strict = true

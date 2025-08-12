@@ -16,30 +16,30 @@ VERSION_OCCURRENCES = [
 ]
 UPDATE_LOCKFILE = True
 
-versions = set()
+found_versions: set[str] = set()
 has_warnings = False
 
 for filename, regex, occurrences in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r") as f:
-        res = re.findall(regex, f.read())
-    if len(res) != occurrences:
+        res1 = re.findall(regex, f.read())
+    if len(res1) != occurrences:
         print(f"WARNING: version occurrence mismatch in {filename}")
         has_warnings = True
-    versions.update(r[1] for r in res)
+    found_versions.update(r[1] for r in res1)
 
-if len(versions) != 1:
-    print(f"WARNING: multiple versions found: {versions}")
+if len(found_versions) != 1:
+    print(f"WARNING: multiple versions found: {found_versions}")
     has_warnings = True
 
-version = max(Version.parse(v) for v in versions)
+version = max(Version.parse(v) for v in found_versions)
 
 if version.prerelease:
-    versions = {
+    version_suggestions = {
         "r": version.finalize_version(),
         "b": version.bump_prerelease(),
     }
 else:
-    versions = {
+    version_suggestions = {
         "M": version.bump_major(),
         "m": version.bump_minor(),
         "p": version.bump_patch(),
@@ -50,17 +50,17 @@ else:
 
 print(f"Current version: {version}")
 print("Possible next versions:")
-for i, (key, value) in enumerate(versions.items(), start=1):
+for i, (key, value) in enumerate(version_suggestions.items(), start=1):
     print(f" {i} or {key}:{' ' * (4 - len(key))}{value}")
 
 next_version = version.bump_prerelease() if version.prerelease else version.bump_patch()
 print(f"Default version: {next_version} [Enter to confirm] or enter a new version")
 user_input = input()
 if user_input:
-    if user_input in versions:
-        next_version = versions[user_input]
+    if user_input in version_suggestions:
+        next_version = version_suggestions[user_input]
     elif user_input.isnumeric():
-        next_version = list(versions.values())[int(user_input) - 1]
+        next_version = list(version_suggestions.values())[int(user_input) - 1]
     else:
         next_version = Version.parse(user_input)
 
@@ -76,9 +76,9 @@ if repo.is_dirty():
 
 for filename, regex, _ in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r+") as f:
-        res = re.sub(regex, f"\\g<1>{next_version}\\g<3>", f.read())
+        res2 = re.sub(regex, f"\\g<1>{next_version}\\g<3>", f.read())
         f.seek(0)
-        f.write(res)
+        f.write(res2)
         f.truncate()
 
 if UPDATE_LOCKFILE:
@@ -88,8 +88,8 @@ if has_warnings:
     print("WARNING: there were warnings, please check the output before continuing")
     input("Press enter to continue")
 
-res = input("Do you want to commit the changes? [y/N] ")
-if res.lower() in {"y", "yes"}:
+res3 = input("Do you want to commit the changes? [y/N] ")
+if res3.lower() in {"y", "yes"}:
     repo.git.add(*{filename for filename, _, _ in VERSION_OCCURRENCES})
     if UPDATE_LOCKFILE:
         repo.git.add("uv.lock")
@@ -105,8 +105,8 @@ if res.lower() in {"y", "yes"}:
             print(f"WARNING: merge {cur_branch} into {MAIN_BRANCH} failed, please merge manually")
         finally:
             repo.git.checkout(cur_branch)
-    res = input("Do you want to push the changes? [y/N] ")
-    if res.lower() in {"y", "yes"}:
+    res4 = input("Do you want to push the changes? [y/N] ")
+    if res4.lower() in {"y", "yes"}:
         repo.git.push(follow_tags=True)
         if not next_version.prerelease:
             repo.git.push("origin", MAIN_BRANCH)

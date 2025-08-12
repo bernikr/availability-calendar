@@ -3,15 +3,15 @@ import datetime
 import re
 
 import aiohttp
-import recurring_ical_events
+import recurring_ical_events  # type: ignore[import-untyped]
 from cachetools import TTLCache
-from cachetools_async import cached
-from icalendar import Calendar, Event
+from cachetools_async import cached  # type: ignore[import-untyped]
+from icalendar import Calendar, Component, Event
 
 from config import TZ, CalendarConfig, SourceConfig
 
 
-@cached(cache=TTLCache(maxsize=20, ttl=60))
+@cached(cache=TTLCache(maxsize=20, ttl=60))  # type: ignore[misc]
 async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         return await response.text()
@@ -48,7 +48,7 @@ def is_all_day(e: Event) -> bool:
     return not isinstance(e.start, datetime.datetime)
 
 
-@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
+@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))  # type: ignore[misc]
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")
@@ -58,11 +58,11 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
     events: list[tuple[Event, SourceConfig]] = []
     for ical, source in zip(icals, config.sources, strict=True):
         cal = Calendar().from_ical(ical)
-        source_events: list[Event] = recurring_ical_events.of(cal).between(
+        source_events: list[Component] = recurring_ical_events.of(cal).between(
             datetime.datetime.now(tz=TZ).date(),
             datetime.datetime.now(tz=TZ).date() + datetime.timedelta(days=config.days_ahead),
-        )  # type: ignore
-        events.extend((e, source) for e in source_events)
+        )
+        events.extend((e, source) for e in source_events if isinstance(e, Event))
 
     for e, source in sorted(events, key=lambda e: (as_datetime(e[0].start), -e[0].duration.total_seconds())):
         if source.filter.name_regex and not re.search(source.filter.name_regex, e.get("SUMMARY", "")):
@@ -72,11 +72,15 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
             continue
 
         if source.hide_if_overlapped and not is_all_day(e):
-            overlaps: list[Event] = recurring_ical_events.of(c).between(
+            overlaps: list[Component] = recurring_ical_events.of(c).between(
                 e.start,
                 e.end,
-            )  # type: ignore
-            if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps if not is_all_day(e2)):
+            )
+            if any(
+                e2.start <= e.start and e2.end >= e.end
+                for e2 in overlaps
+                if isinstance(e2, Event) and not is_all_day(e2)
+            ):
                 continue
 
         c.add_component(create_event(e, source))
