@@ -2,16 +2,15 @@ import datetime
 from pathlib import Path
 from typing import Annotated
 
-import recurring_ical_events  # type: ignore[import-untyped]
 from fastapi import APIRouter, Cookie, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from icalendar import Component, Event
+from icalendar import Event
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 from config import CONFIG, TZ
-from get_calendar import get_calendar
+from get_calendar import events_between, get_calendar
 
 router = APIRouter()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
@@ -62,11 +61,9 @@ async def json_feed(
     if keys is not None and cookie.saved_keys.get(cal, "") not in keys:
         return Response("Unauthorized", status_code=401)
     c = await get_calendar(CONFIG.calendars[cal])
-    events: list[Component] = recurring_ical_events.of(c).between(start, end)
+    events: list[Event] = events_between(c, start, end)
     return JSONResponse(
-        content=[
-            to_fullcalendar_event(e).model_dump(mode="json", by_alias=True) for e in events if isinstance(e, Event)
-        ],
+        content=[to_fullcalendar_event(e).model_dump(mode="json", by_alias=True) for e in events],
     )
 
 
