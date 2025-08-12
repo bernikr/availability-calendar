@@ -58,4 +58,4 @@ VERSION = "1.1.4"
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
 
-CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text()))
+CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text(encoding="utf-8")))

@@ -5,13 +5,13 @@ import re
 import aiohttp
 import recurring_ical_events  # type: ignore[import-untyped]
 from cachetools import TTLCache
-from cachetools_async import cached  # type: ignore[import-untyped]
+from cachetools_async import cached
 from icalendar import Calendar, Component, Event
 
 from config import TZ, CalendarConfig, SourceConfig
 
 
-@cached(cache=TTLCache(maxsize=20, ttl=60))  # type: ignore[misc]
+@cached(cache=TTLCache(maxsize=20, ttl=60))
 async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         return await response.text()
@@ -48,7 +48,7 @@ def is_all_day(e: Event) -> bool:
     return not isinstance(e.start, datetime.datetime)
 
 
-@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))  # type: ignore[misc]
+@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")

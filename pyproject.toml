@@ -4,29 +4,28 @@ version = "1.1.4"
 description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.11.18",
-    "cachetools>=6.0.0",
-    "cachetools-async>=0.0.4",
-    "fastapi[standard]>=0.115.12",
+    "aiohttp>=3.12.15",
+    "cachetools>=6.1.0",
+    "cachetools-async>=0.0.5",
+    "fastapi[standard]>=0.116.1",
     "jinja2>=3.1.6",
-    "pydantic>=2.11.4",
+    "pydantic>=2.11.7",
     "pytz>=2025.2",
     "pyyaml>=6.0.2",
-    "recurring-ical-events>=3.7.0",
+    "recurring-ical-events>=3.8.0",
 ]
 
 [dependency-groups]
 dev = [
-    "gitpython>=3.1.44",
+    "gitpython>=3.1.45",
     "mypy>=1.17.1",
-    "pre-commit>=4.2.0",
-    "pyright>=1.1.403",
-    "ruff>=0.6.9",
+    "pre-commit>=4.3.0",
+    "ruff>=0.12.8",
     "semver>=3.0.4",
     "types-cachetools>=6.1.0.20250717",
     "types-icalendar>=6.3.1.20250809",
     "types-pyyaml>=6.0.12.20250809",
-    "uvicorn>=0.34.2",
+    "uvicorn>=0.35.0",
 ]
 
 [tool.ruff]
