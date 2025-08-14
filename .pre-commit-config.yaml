@@ -1,4 +1,5 @@
 # See https://pre-commit.com for more information
+# Use `pre-commit install -t commit-msg -t pre-commit` to install the hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -20,6 +21,14 @@ repos:
         additional_dependencies: ["uv"]
         types: [python]
         pass_filenames: false
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        args:
+          - --contrib=CT1
+          - --ignore=B6
+          - --msg-filename
 ci:
   skip:
     - mypy
