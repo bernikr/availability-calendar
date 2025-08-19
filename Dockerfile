@@ -5,7 +5,7 @@ ENV CONFIG_FILE=/config.yaml
 
 # Save Version build argument as an environment variable
 ARG VERSION
-ENV VERSION=${VERSION}
+ENV VERSION=${VERSION:-"unspecified"}
 
 ENV UV_COMPILE_BYTECODE=1
 
