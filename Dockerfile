@@ -1,11 +1,12 @@
 FROM ghcr.io/astral-sh/uv:debian
 
-EXPOSE 8000
-
 WORKDIR /app
 ENV CONFIG_FILE=/config.yaml
 
-# Enable bytecode compilation
+# Save Version build argument as an environment variable
+ARG VERSION
+ENV VERSION=${VERSION}
+
 ENV UV_COMPILE_BYTECODE=1
 
 # Copy from the cache instead of linking since it's a mounted volume
@@ -31,5 +32,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 
+EXPOSE 8000
 WORKDIR /app/src
 CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000", "--proxy-headers", "--log-config=log_config.yaml"]

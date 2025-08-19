@@ -1,10 +1,23 @@
+import logging
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Response
 
 import frontend
 from config import CONFIG, VERSION
 from get_calendar import get_calendar
 
-app = FastAPI()
+logger = logging.getLogger("uvicorn.error")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001, RUF029
+    logger.info("VERSION: %s", VERSION)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/version")

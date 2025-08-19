@@ -11,7 +11,6 @@ MAIN_BRANCH = "main"
 
 VERSION_OCCURRENCES = [
     ("pyproject.toml", r'(version = ")(\S+)(")', 1),
-    ("src/config.py", r'(VERSION = ")(\S+)(")', 1),
     ("README.md", r"(image: ghcr.io/bernikr/availability-calendar:)(\S+)()", 1),
 ]
 UPDATE_LOCKFILE = True
