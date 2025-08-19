@@ -54,7 +54,6 @@ class Config(ConfigBaseModel):
 
 
 VERSION = os.getenv("VERSION", "dev")
-
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
 
