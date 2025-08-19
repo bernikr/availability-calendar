@@ -31,6 +31,3 @@ repos:
           - --contrib=CT1
           - --ignore=B6
           - --msg-filename
-ci:
-  skip:
-    - mypy
