@@ -51,17 +51,15 @@ jobs:
           restore-keys: |
             uv-cache-
 
-      - name: Restore Docker cache mounts
-        uses: reproducible-containers/buildkit-cache-dance@v3
+      - uses: reproducible-containers/buildkit-cache-dance@v3
         with:
           builder: ${{ steps.setup-buildx.outputs.name }}
           cache-dir: cache-mount
           dockerfile: Dockerfile
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
 
-      - name: Build and push Docker image
+      - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         id: push
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
