@@ -40,3 +40,5 @@ ignore = [
 
 [tool.mypy]
 strict = true
+local_partial_types = true
+allow_redefinition_new = true

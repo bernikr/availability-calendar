@@ -20,11 +20,11 @@ has_warnings = False
 
 for filename, regex, occurrences in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r") as f:
-        res1 = re.findall(regex, f.read())
-    if len(res1) != occurrences:
+        res = re.findall(regex, f.read())
+    if len(res) != occurrences:
         print(f"WARNING: version occurrence mismatch in {filename}")
         has_warnings = True
-    found_versions.update(r[1] for r in res1)
+    found_versions.update(r[1] for r in res)
 
 if len(found_versions) != 1:
     print(f"WARNING: multiple versions found: {found_versions}")
@@ -75,9 +75,9 @@ if repo.is_dirty():
 
 for filename, regex, _ in VERSION_OCCURRENCES:
     with Path(__file__).parent.joinpath(filename).open("r+") as f:
-        res2 = re.sub(regex, f"\\g<1>{next_version}\\g<3>", f.read())
+        res = re.sub(regex, f"\\g<1>{next_version}\\g<3>", f.read())
         f.seek(0)
-        f.write(res2)
+        f.write(res)
         f.truncate()
 
 if UPDATE_LOCKFILE:
@@ -87,8 +87,8 @@ if has_warnings:
     print("WARNING: there were warnings, please check the output before continuing")
     input("Press enter to continue")
 
-res3 = input("Do you want to commit the changes? [y/N] ")
-if res3.lower() in {"y", "yes"}:
+res = input("Do you want to commit the changes? [y/N] ")
+if res.lower() in {"y", "yes"}:
     repo.git.add(*{filename for filename, _, _ in VERSION_OCCURRENCES})
     if UPDATE_LOCKFILE:
         repo.git.add("uv.lock")
@@ -104,8 +104,8 @@ if res3.lower() in {"y", "yes"}:
             print(f"WARNING: merge {cur_branch} into {MAIN_BRANCH} failed, please merge manually")
         finally:
             repo.git.checkout(cur_branch)
-    res4 = input("Do you want to push the changes? [y/N] ")
-    if res4.lower() in {"y", "yes"}:
+    res = input("Do you want to push the changes? [y/N] ")
+    if res.lower() in {"y", "yes"}:
         repo.git.push(follow_tags=True)
         if not next_version.prerelease:
             repo.git.push("origin", MAIN_BRANCH)
