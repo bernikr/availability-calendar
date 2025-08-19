@@ -11,7 +11,7 @@ from icalendar import Calendar, Component, Event
 from config import TZ, CalendarConfig, SourceConfig
 
 
-@cached(cache=TTLCache(maxsize=20, ttl=60))
+@cached(cache=TTLCache(maxsize=20, ttl=30))
 async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url) as response:
         return await response.text()
