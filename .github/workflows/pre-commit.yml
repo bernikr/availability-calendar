@@ -12,6 +12,6 @@ jobs:
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.1
     - uses: stefanzweifel/git-auto-commit-action@v6
-      if: github.event_name == 'pull_request'
+      if: failure() && github.event_name == 'pull_request'
       with:
         commit_message: "chore: apply pre-commit hooks"
