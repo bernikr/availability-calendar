@@ -3,10 +3,6 @@ FROM ghcr.io/astral-sh/uv:debian
 WORKDIR /app
 ENV CONFIG_FILE=/config.yaml
 
-# Save Version build argument as an environment variable
-ARG VERSION
-ENV VERSION=${VERSION:-"unspecified"}
-
 ENV UV_COMPILE_BYTECODE=1
 
 # Copy from the cache instead of linking since it's a mounted volume
@@ -31,6 +27,10 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
+
+# Save Version build argument as an environment variable
+ARG VERSION
+ENV VERSION=${VERSION:-"unspecified"}
 
 EXPOSE 8000
 WORKDIR /app/src
