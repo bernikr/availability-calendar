@@ -1,4 +1,4 @@
-name: pre-commit
+name: autofix.ci
 
 on:
   pull_request:
@@ -12,3 +12,4 @@ jobs:
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.1
     - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
+      if: failure()
