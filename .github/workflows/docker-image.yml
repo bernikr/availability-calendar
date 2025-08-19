@@ -33,6 +33,7 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
       - uses: actions/checkout@v4
       - name: Set short SHA
         id: vars
