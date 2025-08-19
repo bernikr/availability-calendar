@@ -40,3 +40,9 @@ ignore = [
 
 [tool.mypy]
 strict = true
+
+
+
+
+
+
