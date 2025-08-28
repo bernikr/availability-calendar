@@ -32,6 +32,6 @@ COPY log_config.yaml ./
 
 ARG VERSION
 ENV VERSION=${VERSION:-"unspecified"}
-ENV CONFIG_FILE=/config.yam
+ENV CONFIG_FILE=/config.yaml
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000", "--proxy-headers", "--log-config=log_config.yaml"]
