@@ -1,10 +1,9 @@
-FROM ghcr.io/astral-sh/uv:debian AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-alpine AS builder
 SHELL ["sh", "-exc"]
 
 ENV UV_COMPILE_BYTECODE=1 \ 
     UV_LINK_MODE=copy \
-    UV_PYTHON_INSTALL_DIR=/python \
-    UV_PYTHON_PREFERENCE=only-managed\
+    UV_PYTHON_DOWNLOADS=0 \
     UV_PROJECT_ENVIRONMENT=/app
 
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -21,20 +20,9 @@ WORKDIR /src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
-FROM debian:stable-slim
+FROM python:3.13-alpine
 SHELL ["sh", "-exc"]
 
-RUN <<EOT
-apt-get update -qy
-apt-get install -qyy \
-    -o APT::Install-Recommends=false \
-    -o APT::Install-Suggests=false \
-    ca-certificates
-apt-get clean
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-EOT
-
-COPY --from=builder --chown=python:python /python /python
 COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/bin:$PATH"
 
