@@ -1,4 +1,5 @@
 import logging
+import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from importlib.resources import as_file, files
@@ -14,7 +15,8 @@ logger = logging.getLogger("uvicorn.error")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001, RUF029
-    logger.info("VERSION: %s", VERSION)
+    logger.info("Application version %s", VERSION)
+    logger.info("Running on Python %s", sys.version)
     with as_file(files("templates")) as template_dir:
         frontend.update_template_dir(template_dir)
         yield
