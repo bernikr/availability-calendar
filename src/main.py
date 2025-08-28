@@ -18,7 +18,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001, RUF02
 
 
 app = FastAPI(lifespan=lifespan)
-app.include_router(frontend.router)
 
 
 @app.get("/version")
@@ -36,6 +35,8 @@ async def get_ical(cal: str, key: str = "") -> Response:
     c = await get_calendar(CONFIG.calendars[cal])
     return Response(c.to_ical(), media_type="text/calendar")
 
+
+app.include_router(frontend.router)
 
 if __name__ == "__main__":
     import uvicorn
