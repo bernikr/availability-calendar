@@ -28,6 +28,8 @@ COPY --from=builder --chown=python:python /python /python
 COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/bin:$PATH"
 
+COPY log_config.yaml ./
+
 ARG VERSION
 ENV VERSION=${VERSION:-"unspecified"}
 ENV CONFIG_FILE=/config.yam
