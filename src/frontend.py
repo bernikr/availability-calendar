@@ -16,6 +16,12 @@ router = APIRouter()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
+# workarount to access packaged files (need context manager in lifespan)
+def update_template_dir(template_dir: Path) -> None:
+    global templates  # noqa: PLW0603
+    templates = Jinja2Templates(template_dir)
+
+
 class SessionCookie(BaseModel):
     saved_keys: dict[str, str] = {}
 

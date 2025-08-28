@@ -27,8 +27,9 @@ dev = [
     "types-pyyaml>=6.0.12.20250822",
 ]
 
-[tool.uv]
-package = true
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
 
 [tool.ruff]
 line-length = 120
