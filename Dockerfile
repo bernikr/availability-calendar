@@ -24,6 +24,16 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM debian:stable-slim
 SHELL ["sh", "-exc"]
 
+RUN <<EOT
+apt-get update -qy
+apt-get install -qyy \
+    -o APT::Install-Recommends=false \
+    -o APT::Install-Suggests=false \
+    ca-certificates
+apt-get clean
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+EOT
+
 COPY --from=builder --chown=python:python /python /python
 COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/bin:$PATH"
