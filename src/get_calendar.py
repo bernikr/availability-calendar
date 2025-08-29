@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import re
 
-import aiohttp
+import httpx
 import recurring_ical_events  # type: ignore[import-untyped]
 from cachetools import TTLCache
 from cachetools_async import cached
@@ -12,9 +12,10 @@ from config import TZ, CalendarConfig, SourceConfig
 
 
 @cached(cache=TTLCache(maxsize=20, ttl=60))
-async def fetch_data(session: aiohttp.ClientSession, url: str) -> str:
-    async with session.get(url) as response:
-        return await response.text()
+async def fetch_data(client: httpx.AsyncClient, url: str) -> str:
+    res = await client.get(url)
+    res.raise_for_status()
+    return res.text
 
 
 def create_event(e: Event, source: SourceConfig) -> Event:
@@ -56,8 +57,8 @@ def events_between(cal: Component, start: datetime.date, end: datetime.date) -> 
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")
-    async with aiohttp.ClientSession() as session:
-        icals = await asyncio.gather(*(fetch_data(session, source.url) for source in config.sources))
+    async with httpx.AsyncClient() as client:
+        icals = await asyncio.gather(*(fetch_data(client, source.url) for source in config.sources))
 
     events: list[tuple[Event, SourceConfig]] = []
     for ical, source in zip(icals, config.sources, strict=True):
