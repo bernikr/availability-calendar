@@ -8,10 +8,10 @@ from cachetools import TTLCache
 from cachetools_async import cached
 from icalendar import Calendar, Component, Event
 
-from config import TZ, CalendarConfig, SourceConfig
+from config import CACHE_DURATION, TZ, CalendarConfig, SourceConfig
 
 
-@cached(cache=TTLCache(maxsize=20, ttl=60))
+@cached(cache=TTLCache(maxsize=20, ttl=10))
 async def fetch_data(client: httpx.AsyncClient, url: str) -> str:
     res = await client.get(url)
     res.raise_for_status()
@@ -53,7 +53,7 @@ def events_between(cal: Component, start: datetime.date, end: datetime.date) -> 
     return [e for e in recurring_ical_events.of(cal).between(start, end) if isinstance(e, Event)]
 
 
-@cached(cache=TTLCache(maxsize=10, ttl=15 * 60))
+@cached(cache=TTLCache(maxsize=10, ttl=CACHE_DURATION))
 async def get_calendar(config: CalendarConfig) -> Calendar:
     c = Calendar()
     c.add("REFRESH-INTERVAL;VALUE=DURATION", "PT15M")

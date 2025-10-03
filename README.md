@@ -16,6 +16,7 @@ services:
       - ./config.yaml:/config.yaml
     environment:
       FORWARDED_ALLOW_IPS: 127.0.0.1 # optional, ip of your reverse proxy (if you're using one)
+      CACHE_DURATION: 60 # optional, cache duration in seconds (default: 900 / 15 min)
     ports:
       - 8000:8000
 ```

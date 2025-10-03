@@ -55,6 +55,7 @@ class Config(ConfigBaseModel):
 
 VERSION = os.getenv("VERSION", "dev")
 TZ = pytz.timezone(os.getenv("TZ", "Europe/Vienna"))
+CACHE_DURATION = int(os.getenv("CACHE_DURATION", str(15 * 60)))
 CONFIG_FILE = Path(os.getenv("CONFIG_FILE", Path(__file__).parent.parent / "config.yaml"))
 
 CONFIG = Config.model_validate(yaml.safe_load(CONFIG_FILE.read_text(encoding="utf-8")))
