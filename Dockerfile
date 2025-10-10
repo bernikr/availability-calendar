@@ -4,11 +4,11 @@ SHELL ["sh", "-exc"]
 ENV UV_COMPILE_BYTECODE=1 \ 
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=0 \
-    UV_PROJECT_ENVIRONMENT=/app
+    UV_PROJECT_ENVIRONMENT=/venv
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=.python-version,target=.python-version \
-    uv venv /app
+    uv venv /venv
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
@@ -23,9 +23,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM python:3.13-alpine
 
-COPY --from=env-builder --chown=app:app /app /app
-COPY --from=app-builder --chown=app:app /app /app
-ENV PATH="/app/bin:$PATH"
+COPY --from=env-builder /venv /venv
+COPY --from=app-builder /venv /venv
+ENV PATH="/venv/bin:$PATH"
 
 COPY log_config.yaml ./
 
