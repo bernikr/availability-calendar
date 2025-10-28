@@ -74,6 +74,9 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
         if source.filter.name_regex and not re.search(source.filter.name_regex, e.get("SUMMARY", "")):
             continue
 
+        if source.filter.exclude_all_day and is_all_day(e):
+            continue
+
         if e.get("TRANSP", "OPAQUE") != "OPAQUE":
             continue
 

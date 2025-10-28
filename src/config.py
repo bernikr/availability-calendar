@@ -31,6 +31,7 @@ class ConfigBaseModel(BaseModel):
 
 class FilterConfig(ConfigBaseModel):
     name_regex: re.Pattern[str] | None = None
+    exclude_all_day: bool = False
 
 
 class SourceConfig(ConfigBaseModel):
