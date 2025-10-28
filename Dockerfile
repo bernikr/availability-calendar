@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=.,target=/src,rw  \
     uv sync --locked --no-dev --no-editable --directory /src
 
-FROM python:3.13-alpine
+FROM python:3.13-alpine AS runtime
 
 COPY --from=env-builder /venv /venv
 COPY --from=app-builder /venv /venv
