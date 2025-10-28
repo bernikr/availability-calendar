@@ -82,6 +82,8 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
 
         if source.hide_if_overlapped and not is_all_day(e):
             overlaps = events_between(c, e.start, e.end)
+            if not source.tentative:
+                overlaps = [e2 for e2 in overlaps if e2.get("STATUS") != "TENTATIVE"]
             if any(e2.start <= e.start and e2.end >= e.end for e2 in overlaps if not is_all_day(e2)):
                 continue
 
