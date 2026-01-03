@@ -30,6 +30,11 @@ def version() -> dict[str, str]:
     return {"version": VERSION}
 
 
+@app.get("/hc")
+def healthcheck() -> str:
+    return "OK"
+
+
 @app.get("/{cal}.ics")
 async def get_ical(cal: str, key: str = "") -> Response:
     if cal not in CONFIG.calendars:

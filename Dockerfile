@@ -33,4 +33,5 @@ ARG VERSION
 ENV VERSION=${VERSION:-"unspecified"}
 ENV CONFIG_FILE=/config.yaml
 EXPOSE 8000
+HEALTHCHECK CMD sh -c '[ "$(wget -qO - http://127.0.0.1:8000/hc )" = OK ]'
 CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000", "--proxy-headers", "--log-config=log_config.yaml"]
