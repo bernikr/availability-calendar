@@ -31,8 +31,8 @@ def version() -> dict[str, str]:
 
 
 @app.get("/hc")
-def healthcheck() -> tuple[str, int]:
-    return "OK", 200
+def healthcheck() -> Response:
+    return Response("OK", media_type="text/plain")
 
 
 @app.get("/{cal}.ics")
