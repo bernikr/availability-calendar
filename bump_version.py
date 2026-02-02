@@ -92,7 +92,7 @@ if res.lower() in {"y", "yes"}:
     repo.git.add(*{filename for filename, _, _ in VERSION_OCCURRENCES})
     if UPDATE_LOCKFILE:
         repo.git.add("uv.lock")
-    repo.git.commit("-m", f"build: bump version to {next_version}")
+    repo.git.commit("-m", f"build: bump version to {next_version}", "--no-verify")
     repo.create_tag(f"v{next_version}", message=f"bump version to {next_version}")
     print("changes committed and created tag")
     if not next_version.prerelease:
