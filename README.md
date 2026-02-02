@@ -23,7 +23,7 @@ services:
 
 `config.yaml`
 
-```yaml  
+```yaml
 calendars:
   work: # the name of the calendar (will be used as the filename)
     key: <private key> # optional, if set the calendar will only be accessible with the key
