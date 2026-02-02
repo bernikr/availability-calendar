@@ -1,8 +1,7 @@
-# See https://pre-commit.com for more information
-# Use `pre-commit install -t commit-msg -t pre-commit` to install the hooks
+# Install with `prek install`
+default_install_hook_types: [pre-commit, commit-msg]
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+  - repo: builtin
     hooks:
       - id: end-of-file-fixer
       - id: check-added-large-files
