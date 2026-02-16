@@ -47,6 +47,8 @@ jobs:
         id: setup-buildx
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.version }}
 
       - name: Set version info variables
         id: vars
