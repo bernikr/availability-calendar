@@ -1,0 +1,84 @@
+name: Release Manager
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release-process:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.semver.outputs.version_tag }}
+      changed: ${{ steps.semver.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 1. Install uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      # 2. Calculate Version
+      - name: Calculate Next Version
+        id: semver
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(MAJOR)"
+          minor_pattern: "feat:"
+          version_format: "${major}.${minor}.${patch}"
+
+      # 3. Update Files (Only if version changed)
+      - name: Update Version Files
+        if: steps.semver.outputs.changed == 'true'
+        run: |
+          NEW_VERSION="${{ steps.semver.outputs.version }}"
+
+          echo "Updating version to $NEW_VERSION..."
+
+          # A. Update pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" pyproject.toml
+
+          # B. Update README.md
+          sed -i "s/ghcr.io\/bernikr\/availability-calendar:[0-9]\+\.[0-9]\+\.[0-9]\+/ghcr.io\/bernikr\/availability-calendar:$NEW_VERSION/g" README.md
+
+          # C. Update uv.lock
+          uv lock
+
+      # 4. Commit, Tag, and Push
+      - name: Commit and Push Changes
+        if: steps.semver.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Stage specific files to ensure we don't commit garbage
+          git add pyproject.toml uv.lock README.md
+
+          # Commit
+          git commit -m "chore(release): bump version to ${{ steps.semver.outputs.version }}"
+
+          # Push the COMMIT first (updates main)
+          git push origin main
+
+          # Tag the NEW commit
+          git tag ${{ steps.semver.outputs.version_tag }}
+
+          # Push the TAG
+          git push origin ${{ steps.semver.outputs.version_tag }}
+
+  # 5. Call the Build Workflow
+  call-build-workflow:
+    needs: release-process
+    if: needs.release-process.outputs.changed == 'true'
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.release-process.outputs.new_tag }}
