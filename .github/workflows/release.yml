@@ -79,6 +79,6 @@ jobs:
   call-build-workflow:
     needs: release-process
     if: needs.release-process.outputs.changed == 'true'
-    uses: ./.github/workflows/build.yml
+    uses: ./.github/workflows/docker-image.yml
     with:
       version: ${{ needs.release-process.outputs.new_tag }}
