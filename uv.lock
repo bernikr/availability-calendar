@@ -34,7 +34,7 @@ wheels = [
 
 [[package]]
 name = "availability-calendar"
-version = "1.1.14"
+version = "1.1.15"
 source = { editable = "." }
 dependencies = [
     { name = "cachetools-async" },
