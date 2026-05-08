@@ -16,7 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "gitpython>=3.1.46",
+  "gitpython>=3.1.49",
   "mypy>=1.19.1",
   "prek>=0.3.3",
   "ruff>=0.15.1",
