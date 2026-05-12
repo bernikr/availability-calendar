@@ -5,25 +5,23 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
   "cachetools-async>=0.0.5",
-  "fastapi>=0.129.0",
+  "fastapi>=0.136.1",
   "httpx>=0.28.1",
   "jinja2>=3.1.6",
-  "pytz>=2025.2",
+  "pytz>=2026.2",
   "pyyaml>=6.0.3",
-  "recurring-ical-events>=3.8.0",
-  "uvicorn>=0.40.0",
+  "recurring-ical-events>=3.8.2",
+  "uvicorn>=0.46.0",
 ]
 
 [dependency-groups]
 dev = [
-  "gitpython>=3.1.46",
-  "mypy>=1.19.1",
-  "prek>=0.3.3",
-  "ruff>=0.15.1",
-  "semver>=3.0.4",
-  "types-cachetools>=6.2.0.20251022",
-  "types-icalendar>=6.3.2.20260213",
-  "types-pyyaml>=6.0.12.20250915",
+  "mypy>=2.1.0",
+  "prek>=0.3.13",
+  "ruff>=0.15.12",
+  "types-cachetools>=7.0.0.20260503",
+  "types-icalendar>=6.3.2.20260508",
+  "types-pyyaml>=6.0.12.20260510",
 ]
 
 [build-system]
