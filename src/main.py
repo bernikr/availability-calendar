@@ -14,7 +14,7 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001, RUF029
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001
     logger.info("Application version %s", VERSION)
     logger.info("Running on Python %s", sys.version)
     with as_file(files("templates")) as template_dir:

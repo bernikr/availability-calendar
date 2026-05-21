@@ -11,17 +11,17 @@ dependencies = [
   "pytz>=2026.2",
   "pyyaml>=6.0.3",
   "recurring-ical-events>=3.8.2",
-  "uvicorn>=0.46.0",
+  "uvicorn>=0.47.0",
 ]
 
 [dependency-groups]
 dev = [
   "mypy>=2.1.0",
-  "prek>=0.3.13",
-  "ruff>=0.15.12",
-  "types-cachetools>=7.0.0.20260503",
-  "types-icalendar>=6.3.2.20260508",
-  "types-pyyaml>=6.0.12.20260510",
+  "prek>=0.4.1",
+  "ruff>=0.15.14",
+  "types-cachetools>=7.0.0.20260518",
+  "types-icalendar>=6.3.2.20260518",
+  "types-pyyaml>=6.0.12.20260518",
 ]
 
 [build-system]
