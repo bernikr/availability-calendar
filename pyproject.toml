@@ -5,20 +5,20 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
   "cachetools-async>=0.0.5",
-  "fastapi>=0.136.1",
+  "fastapi>=0.137.2",
   "httpx>=0.28.1",
   "jinja2>=3.1.6",
   "pytz>=2026.2",
   "pyyaml>=6.0.3",
   "recurring-ical-events>=3.8.2",
-  "uvicorn>=0.47.0",
+  "uvicorn>=0.49.0",
 ]
 
 [dependency-groups]
 dev = [
   "mypy>=2.1.0",
-  "prek>=0.4.1",
-  "ruff>=0.15.14",
+  "prek>=0.4.5",
+  "ruff>=0.15.17",
   "types-cachetools>=7.0.0.20260518",
   "types-icalendar>=6.3.2.20260518",
   "types-pyyaml>=6.0.12.20260518",
