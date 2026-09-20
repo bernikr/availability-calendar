@@ -18,7 +18,7 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 # workarount to access packaged files (need context manager in lifespan)
 def update_template_dir(template_dir: Path) -> None:
-    global templates  # noqa: PLW0603
+    global templates  # ruff: ignore[global-statement]
     templates = Jinja2Templates(template_dir)
 
 

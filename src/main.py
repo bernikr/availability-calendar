@@ -14,7 +14,7 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # noqa: ARG001
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:  # ruff: ignore[unused-function-argument]
     logger.info("Application version %s", VERSION)
     logger.info("Running on Python %s", sys.version)
     with as_file(files("templates")) as template_dir:
@@ -51,4 +51,4 @@ app.include_router(frontend.router)
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, log_level="info", reload=True)  # noqa: S104
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, log_level="info", reload=True)  # ruff: ignore[hardcoded-bind-all-interfaces]
