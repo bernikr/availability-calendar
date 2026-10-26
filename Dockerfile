@@ -5,26 +5,17 @@
 FROM ghcr.io/astral-sh/uv:trixie-slim AS builder
 SHELL ["sh", "-exc"]
 
-ENV UV_COMPILE_BYTECODE=0 \
+ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_NO_DEV=1 \
     UV_PYTHON_PREFERENCE=only-managed \
     UV_PYTHON_INSTALL_DIR=/python \
-    UV_PROJECT_ENVIRONMENT=/venv
+    UV_PROJECT_ENVIRONMENT=/venv \
+    UV_PREVIEW_FEATURES=frozen-lockfile
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
-    uv sync --frozen --no-install-project --preview-features frozen-lockfile
-
-# prune unnecessary python files
-RUN find /python -type d \( \
-    -name "test" \
-    -o -name "tests" \
-    -o -name "idlelib" \
-    -o -name "turtledemo" \
-    -o -name "ensurepip" \
-    \) -exec rm -rf {} + \
-    && find /python \( -name "*.a" -o -name "*.pyc" -o -name "*.pyo" \) -delete
+    uv sync --frozen --no-install-project
 
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
