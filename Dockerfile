@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:trixie AS builder
+FROM ghcr.io/astral-sh/uv:trixie-slim AS builder
 SHELL ["sh", "-exc"]
 
 ENV UV_COMPILE_BYTECODE=0 \
@@ -28,10 +28,9 @@ RUN find /python -type d \( -name "test" -o -name "tests" -o -name "idlelib" -o 
     /python/.lock \
     /python/.temp \
     /venv/.lock && \
-    find /python -name "*.a" -delete && \
-    find /python /venv -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+    find /python -name "*.a" -delete
 
-FROM gcr.io/distroless/base-debian13:latest AS runtime
+FROM gcr.io/distroless/cc-debian13:latest AS runtime
 
 COPY --from=builder /python /python
 COPY --from=builder /venv /venv
