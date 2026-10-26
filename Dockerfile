@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:trixie-slim AS builder
+FROM ghcr.io/astral-sh/uv:trixie AS builder
 SHELL ["sh", "-exc"]
 
-ENV UV_COMPILE_BYTECODE=1 \
+ENV UV_COMPILE_BYTECODE=0 \
     UV_LINK_MODE=copy \
     UV_NO_DEV=1 \
     UV_PYTHON_PREFERENCE=only-managed \
@@ -21,7 +21,17 @@ COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --directory /src
 
-FROM gcr.io/distroless/cc-debian13:latest AS runtime
+# slim the image down to only what we need
+RUN find /python -type d \( -name "test" -o -name "tests" -o -name "idlelib" -o -name "turtledemo" \) -exec rm -rf {} + && \
+    rm -rf /python/*/include \
+    /python/*/share \
+    /python/.lock \
+    /python/.temp \
+    /venv/.lock && \
+    find /python -name "*.a" -delete && \
+    find /python /venv -type f -exec strip --strip-unneeded {} + 2>/dev/null || true
+
+FROM gcr.io/distroless/base-debian13:latest AS runtime
 
 COPY --from=builder /python /python
 COPY --from=builder /venv /venv
