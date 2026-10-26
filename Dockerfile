@@ -16,6 +16,16 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     uv sync --frozen --no-install-project --preview-features frozen-lockfile
 
+# prune unnecessary python files
+RUN find /python -type d \( \
+    -name "test" \
+    -o -name "tests" \
+    -o -name "idlelib" \
+    -o -name "turtledemo" \
+    -o -name "ensurepip" \
+    \) -exec rm -rf {} + \
+    && find /python (-name "*.a" -o -name "*.pyc" -o -name "*.pyo") -delete
+
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --directory /src
