@@ -1,5 +1,5 @@
 import asyncio
-import datetime
+import datetime as dt
 import re
 
 import httpx
@@ -39,17 +39,17 @@ def create_event(e: Event, source: SourceConfig) -> Event:
     return ne
 
 
-def as_datetime(dt: datetime.datetime | datetime.date) -> datetime.datetime:
-    if isinstance(dt, datetime.datetime):
-        return dt
-    return datetime.datetime.combine(dt, datetime.time(0, 0, 0), tzinfo=TZ)
+def as_datetime(datetime: dt.datetime | dt.date) -> dt.datetime:
+    if isinstance(datetime, dt.datetime):
+        return datetime
+    return dt.datetime.combine(datetime, dt.time(0, 0, 0), tzinfo=TZ)
 
 
 def is_all_day(e: Event) -> bool:
-    return not isinstance(e.start, datetime.datetime)
+    return not isinstance(e.start, dt.datetime)
 
 
-def events_between(cal: Component, start: datetime.date, end: datetime.date) -> list[Event]:
+def events_between(cal: Component, start: dt.date, end: dt.date) -> list[Event]:
     return [e for e in recurring_ical_events.of(cal).between(start, end) if isinstance(e, Event)]
 
 
@@ -65,8 +65,8 @@ async def get_calendar(config: CalendarConfig) -> Calendar:
         cal = Calendar().from_ical(ical)
         source_events = events_between(
             cal,
-            datetime.datetime.now(tz=TZ),
-            datetime.datetime.now(tz=TZ) + datetime.timedelta(days=config.days_ahead),
+            dt.datetime.now(tz=TZ),
+            dt.datetime.now(tz=TZ) + dt.timedelta(days=config.days_ahead),
         )
         events.extend((e, source) for e in source_events)
 

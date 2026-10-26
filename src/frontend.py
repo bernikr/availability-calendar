@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 from pathlib import Path
 from typing import Annotated
 
@@ -33,8 +33,8 @@ class FullCalendarEvent(BaseModel):
         ),
     )
 
-    start: datetime.datetime | datetime.date
-    end: datetime.datetime | datetime.date
+    start: dt.datetime | dt.date
+    end: dt.datetime | dt.date
     title: str
     class_names: list[str]
 
@@ -46,8 +46,8 @@ def to_fullcalendar_event(e: Event) -> FullCalendarEvent:
         css_classes.append("tentative")
 
     return FullCalendarEvent(
-        start=e.start.astimezone(tz=TZ) if isinstance(e.start, datetime.datetime) else e.start,
-        end=e.end.astimezone(tz=TZ) if isinstance(e.end, datetime.datetime) else e.end,
+        start=e.start.astimezone(tz=TZ) if isinstance(e.start, dt.datetime) else e.start,
+        end=e.end.astimezone(tz=TZ) if isinstance(e.end, dt.datetime) else e.end,
         title=e.get("SUMMARY", ""),
         class_names=css_classes,
     )
@@ -56,8 +56,8 @@ def to_fullcalendar_event(e: Event) -> FullCalendarEvent:
 @router.get("/{cal}.json")
 async def json_feed(
     cal: str,
-    start: datetime.datetime,
-    end: datetime.datetime,
+    start: dt.datetime,
+    end: dt.datetime,
     session: Annotated[str, Cookie()] = "{}",
 ) -> Response:
     if cal not in CONFIG.calendars:
