@@ -24,7 +24,7 @@ RUN find /python -type d \( \
     -o -name "turtledemo" \
     -o -name "ensurepip" \
     \) -exec rm -rf {} + \
-    && find /python \(-name "*.a" -o -name "*.pyc" -o -name "*.pyo"\) -delete
+    && find /python \( -name "*.a" -o -name "*.pyc" -o -name "*.pyo" \) -delete
 
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
