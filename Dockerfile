@@ -20,18 +20,22 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 FROM env-builder AS app-builder
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=.,target=/src,rw  \
+    --mount=type=bind,source=.,target=/src  \
     uv sync --locked --no-editable --directory /src
 
 FROM alpine:latest AS runtime
 
+RUN addgroup -g 999 -S nonroot \
+    && adduser -u 999 -S -G nonroot nonroot
+
 COPY --from=env-builder /python /python
-COPY --from=env-builder /venv /venv
-COPY --from=app-builder /venv /venv
+COPY --from=env-builder --chown=nonroot:nonroot /venv /venv
+COPY --from=app-builder --chown=nonroot:nonroot /venv /venv
 ENV PATH="/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
+USER nonroot
 
-COPY log_config.yaml ./
+COPY --chown=nonroot:nonroot log_config.yaml ./
 
 ARG VERSION
 ENV VERSION=${VERSION:-"unspecified"}
