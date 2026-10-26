@@ -25,21 +25,20 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM alpine:latest AS runtime
 
-RUN addgroup -g 999 -S nonroot \
-    && adduser -u 999 -S -G nonroot nonroot
+WORKDIR /app
+RUN adduser -D -u 1000 nonroot
+USER 1000:1000
 
 COPY --from=env-builder /python /python
-COPY --from=env-builder --chown=nonroot:nonroot /venv /venv
-COPY --from=app-builder --chown=nonroot:nonroot /venv /venv
+COPY --from=app-builder /venv /venv
 ENV PATH="/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
-USER nonroot
 
-COPY --chown=nonroot:nonroot log_config.yaml ./
+COPY log_config.yaml ./
 
 ARG VERSION
 ENV VERSION=${VERSION:-"unspecified"}
 ENV CONFIG_FILE=/config.yaml
 EXPOSE 8000
-HEALTHCHECK --start-period=30s CMD [ "$( wget -qO - http://127.0.0.1:8000/hc )" = OK ]
+HEALTHCHECK --start-period=30s CMD test "$(wget -qO- -T 3 http://127.0.0.1:8000/hc)" = "OK"
 CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000", "--proxy-headers", "--log-config=log_config.yaml"]
