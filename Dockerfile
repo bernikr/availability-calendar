@@ -2,34 +2,34 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:python3.15-alpine AS env-builder
+FROM ghcr.io/astral-sh/uv:alpine AS env-builder
 SHELL ["sh", "-exc"]
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_DEV=1 \
+    UV_PYTHON_PREFERENCE=only-managed \
+    UV_PYTHON_INSTALL_DIR=/python \
     UV_PROJECT_ENVIRONMENT=/venv
-
-RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=.python-version,target=.python-version \
-    uv venv /venv
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+    uv sync --locked --no-install-project
 
 FROM env-builder AS app-builder
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=.,target=/src,rw  \
-    uv sync --locked --no-dev --no-editable --directory /src
+    uv sync --locked --no-editable --directory /src
 
-FROM python:3.15-alpine AS runtime
+FROM alpine:latest AS runtime
 
+COPY --from=env-builder /python /python
 COPY --from=env-builder /venv /venv
 COPY --from=app-builder /venv /venv
-ENV PATH="/venv/bin:$PATH"
+ENV PATH="/venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
 
 COPY log_config.yaml ./
 
