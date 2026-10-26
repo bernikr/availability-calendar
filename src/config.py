@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import re
 from pathlib import Path
 from typing import Annotated, overload
+lazy import re
 
 import pytz
 import yaml

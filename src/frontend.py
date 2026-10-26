@@ -9,9 +9,9 @@ from typing import Annotated
 from fastapi import APIRouter, Cookie, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from icalendar import Event
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+lazy from icalendar import Event
 
 from config import CONFIG, TZ
 from get_calendar import events_between, get_calendar

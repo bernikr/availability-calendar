@@ -4,9 +4,9 @@
 
 import logging
 import sys
-from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from importlib.resources import as_file, files
+lazy from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI, Response
 
