@@ -1,3 +1,8 @@
+{#
+SPDX-FileCopyrightText: 2025 bernikr <hi@berni.kr>
+
+SPDX-License-Identifier: MIT
+#}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,10 +29,11 @@
         .tentative {
             background-color: #a2cdf8;
         }
+
     </style>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -50,6 +56,7 @@
 
             calendar.render();
         });
+
     </script>
 </head>
 

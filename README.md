@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 bernikr <hi@berni.kr>
+
+SPDX-License-Identifier: MIT
+-->
+
 # Availability Calendar
 
 Create an ical calendar with your availability based on multiple source ical calendars.

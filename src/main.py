@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 bernikr <hi@berni.kr>
+#
+# SPDX-License-Identifier: MIT
+
 import logging
 import sys
 from collections.abc import AsyncGenerator

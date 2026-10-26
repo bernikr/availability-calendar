@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 bernikr <hi@berni.kr>
+#
+# SPDX-License-Identifier: MIT
+
 FROM ghcr.io/astral-sh/uv:python3.13-alpine AS env-builder
 SHELL ["sh", "-exc"]
 

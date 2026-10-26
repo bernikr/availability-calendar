@@ -1,4 +1,9 @@
+# SPDX-FileCopyrightText: 2025 bernikr <hi@berni.kr>
+#
+# SPDX-License-Identifier: MIT
+
 .env
 config.yaml
 __pycache__/
 *.egg-info/
+.vscode/
