@@ -14,21 +14,11 @@ ENV UV_COMPILE_BYTECODE=0 \
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project
+    uv sync --locked --no-install-project --preview-features frozen-lockfile
 
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --directory /src
-
-# slim the image down to only what we need
-RUN find /python -type d \( -name "test" -o -name "tests" -o -name "idlelib" -o -name "turtledemo" \) -exec rm -rf {} + && \
-    rm -rf /python/*/include \
-    /python/*/share \
-    /python/.lock \
-    /python/.temp \
-    /venv/.lock && \
-    find /python -name "*.a" -delete
 
 FROM gcr.io/distroless/cc-debian13:latest AS runtime
 
