@@ -14,7 +14,7 @@ ENV UV_COMPILE_BYTECODE=0 \
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
-    uv sync --locked --no-install-project --preview-features frozen-lockfile
+    uv sync --frozen --no-install-project --preview-features frozen-lockfile
 
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
