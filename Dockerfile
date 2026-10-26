@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM ghcr.io/astral-sh/uv:alpine AS env-builder
+FROM ghcr.io/astral-sh/uv:alpine AS builder
 SHELL ["sh", "-exc"]
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -17,10 +17,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-install-project
 
-FROM env-builder AS app-builder
-
+COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=.,target=/src  \
     uv sync --locked --no-editable --directory /src
 
 FROM alpine:latest AS runtime
@@ -29,8 +27,8 @@ WORKDIR /app
 RUN adduser -D -u 1000 nonroot
 USER 1000:1000
 
-COPY --from=env-builder /python /python
-COPY --from=app-builder /venv /venv
+COPY --from=builder /python /python
+COPY --from=builder /venv /venv
 ENV PATH="/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
