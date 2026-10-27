@@ -4,6 +4,7 @@
 
 FROM ghcr.io/astral-sh/uv:trixie-slim AS builder
 SHELL ["sh", "-exc"]
+WORKDIR /src
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -19,7 +20,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-editable --directory /src
+    uv sync --locked --no-editable
 
 FROM gcr.io/distroless/cc-debian13:latest AS runtime
 
