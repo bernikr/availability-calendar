@@ -13,7 +13,7 @@ from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 lazy from icalendar import Event
 
-from config import CONFIG, TZ
+from config import CONFIG, TZ, VERSION
 from get_calendar import events_between, get_calendar
 
 router = APIRouter()
@@ -94,10 +94,17 @@ async def cal_view(
         cookie.saved_keys[cal] = key
         response: Response = RedirectResponse(url=f"/{cal}")
     else:
+        saved_key = cookie.saved_keys.get(cal, "")
         response = templates.TemplateResponse(
             request=request,
             name="calendar.html",
-            context={"cal": cal, "tz": TZ.zone},
+            context={
+                "cal": cal,
+                "tz": TZ.zone,
+                "cal_key": saved_key,
+                "requires_key": keys is not None,
+                "version": VERSION,
+            },
         )
 
     response.set_cookie(
